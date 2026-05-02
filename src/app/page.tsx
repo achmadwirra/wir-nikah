@@ -14,9 +14,16 @@ const features = [
 ];
 
 const templates = [
-  { name: "Elegant Gold", color: "from-yellow-100 to-amber-50", accent: "text-amber-700", border: "border-amber-300" },
-  { name: "Garden Romance", color: "from-green-50 to-pink-50", accent: "text-green-700", border: "border-green-300" },
-  { name: "Modern Minimalist", color: "from-gray-50 to-white", accent: "text-gray-800", border: "border-gray-300" },
+  { name: "Elegant Gold", color: "from-yellow-100 to-amber-50", accent: "text-amber-700", border: "border-amber-300", emoji: "👑" },
+  { name: "Garden Romance", color: "from-green-50 to-pink-50", accent: "text-green-700", border: "border-green-300", emoji: "🌸" },
+  { name: "Modern Minimalist", color: "from-gray-50 to-white", accent: "text-gray-800", border: "border-gray-300", emoji: "◼️" },
+  { name: "Javanese Traditional", color: "from-red-100 to-yellow-50", accent: "text-red-800", border: "border-red-400", emoji: "🏛️" },
+  { name: "Islamic Elegant", color: "from-green-100 to-emerald-50", accent: "text-green-800", border: "border-green-400", emoji: "☪️" },
+  { name: "Navy Luxury", color: "from-blue-100 to-indigo-50", accent: "text-blue-900", border: "border-blue-400", emoji: "💎" },
+  { name: "Cherry Blossom", color: "from-pink-100 to-pink-50", accent: "text-pink-700", border: "border-pink-300", emoji: "🌸" },
+  { name: "Rustic Vintage", color: "from-orange-50 to-amber-50", accent: "text-amber-800", border: "border-orange-300", emoji: "🍂" },
+  { name: "Tropical Paradise", color: "from-teal-50 to-orange-50", accent: "text-teal-700", border: "border-teal-300", emoji: "🌴" },
+  { name: "Sage Eucalyptus", color: "from-green-50 to-lime-50", accent: "text-green-700", border: "border-green-300", emoji: "🌿" },
 ];
 
 const testimonials = [
@@ -101,24 +108,24 @@ export default function HomePage() {
             </h2>
             <p className="text-gray-600 text-lg">Pilih desain yang sesuai dengan tema pernikahan Anda</p>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
             {templates.map((t, i) => (
               <motion.div
                 key={t.name}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                className={`bg-gradient-to-br ${t.color} ${t.border} border-2 rounded-2xl p-8 text-center hover:shadow-xl transition-shadow`}
+                transition={{ delay: i * 0.1 }}
+                className={`bg-gradient-to-br ${t.color} ${t.border} border-2 rounded-2xl p-4 md:p-6 text-center hover:shadow-xl transition-shadow`}
               >
-                <div className="w-full h-48 bg-white/50 rounded-xl mb-4 flex items-center justify-center">
+                <div className="w-full h-32 md:h-40 bg-white/50 rounded-xl mb-3 flex items-center justify-center">
                   <div className={`text-center ${t.accent}`}>
-                    <Heart className="w-12 h-12 mx-auto mb-2 fill-current opacity-30" />
-                    <p className="font-serif text-2xl">Ahmad & Sarah</p>
-                    <p className="text-sm mt-1 opacity-70">12 . 06 . 2026</p>
+                    <span className="text-3xl md:text-4xl block mb-2">{t.emoji}</span>
+                    <p className="font-serif text-sm md:text-lg">Ahmad & Sarah</p>
+                    <p className="text-xs mt-1 opacity-70">12 . 06 . 2026</p>
                   </div>
                 </div>
-                <h3 className={`text-xl font-bold ${t.accent}`}>{t.name}</h3>
+                <h3 className={`text-sm md:text-base font-bold ${t.accent}`}>{t.name}</h3>
               </motion.div>
             ))}
           </div>

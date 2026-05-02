@@ -16,9 +16,16 @@ const steps = [
 ];
 
 const templates = [
-  { id: "ELEGANT_GOLD", name: "Elegant Gold", desc: "Gold & cream, classic elegance", colors: "from-yellow-100 to-amber-50 border-amber-300" },
-  { id: "GARDEN_ROMANCE", name: "Garden Romance", desc: "Green & pink, floral beauty", colors: "from-green-50 to-pink-50 border-green-300" },
-  { id: "MODERN_MINIMALIST", name: "Modern Minimalist", desc: "Black & white, clean design", colors: "from-gray-50 to-white border-gray-300" },
+  { id: "ELEGANT_GOLD", name: "Elegant Gold", desc: "Gold & cream, classic luxury", colors: "from-yellow-100 to-amber-50 border-amber-300", emoji: "👑" },
+  { id: "GARDEN_ROMANCE", name: "Garden Romance", desc: "Green & pink, floral botanical", colors: "from-green-50 to-pink-50 border-green-300", emoji: "🌸" },
+  { id: "MODERN_MINIMALIST", name: "Modern Minimalist", desc: "Black & white, clean typography", colors: "from-gray-50 to-white border-gray-300", emoji: "◼️" },
+  { id: "RUSTIC_VINTAGE", name: "Rustic Vintage", desc: "Brown & beige, kraft paper feel", colors: "from-orange-50 to-amber-50 border-orange-300", emoji: "🍂" },
+  { id: "JAVANESE_TRADITIONAL", name: "Javanese Traditional", desc: "Deep red & gold, batik patterns", colors: "from-red-100 to-yellow-50 border-red-400", emoji: "🏛️" },
+  { id: "ISLAMIC_ELEGANT", name: "Islamic Elegant", desc: "Green & gold, geometric patterns", colors: "from-green-100 to-emerald-50 border-green-400", emoji: "☪️" },
+  { id: "CHERRY_BLOSSOM", name: "Cherry Blossom", desc: "Soft pink & white, sakura theme", colors: "from-pink-100 to-pink-50 border-pink-300", emoji: "🌸" },
+  { id: "NAVY_LUXURY", name: "Navy Luxury", desc: "Navy blue & silver, premium feel", colors: "from-blue-100 to-indigo-50 border-blue-400", emoji: "💎" },
+  { id: "TROPICAL_PARADISE", name: "Tropical Paradise", desc: "Teal & coral, beach vibes", colors: "from-teal-50 to-orange-50 border-teal-300", emoji: "🌴" },
+  { id: "SAGE_EUCALYPTUS", name: "Sage Eucalyptus", desc: "Sage green & white, organic natural", colors: "from-green-50 to-lime-50 border-green-300", emoji: "🌿" },
 ];
 
 export default function CreateInvitationPage() {
@@ -149,18 +156,18 @@ export default function CreateInvitationPage() {
           {step === 0 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Pilih Template</h2>
-              <div className="grid sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {templates.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => updateForm("template", t.id)}
-                    className={`bg-gradient-to-br ${t.colors} border-2 rounded-xl p-6 text-center transition hover:shadow-lg ${
+                    className={`bg-gradient-to-br ${t.colors} border-2 rounded-xl p-4 sm:p-5 text-center transition hover:shadow-lg ${
                       form.template === t.id ? "ring-2 ring-amber-500 ring-offset-2" : ""
                     }`}
                   >
-                    <Heart className="w-10 h-10 mx-auto mb-3 text-current opacity-50" />
-                    <h3 className="font-bold text-lg">{t.name}</h3>
-                    <p className="text-sm opacity-70 mt-1">{t.desc}</p>
+                    <span className="text-3xl block mb-2">{t.emoji}</span>
+                    <h3 className="font-bold text-sm sm:text-base">{t.name}</h3>
+                    <p className="text-xs opacity-70 mt-1 line-clamp-2">{t.desc}</p>
                   </button>
                 ))}
               </div>

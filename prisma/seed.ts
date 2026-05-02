@@ -67,7 +67,62 @@ async function main() {
     },
   });
 
-  // Create sample RSVPs
+  // Create second sample invitation - Javanese Traditional
+  const invitation2 = await prisma.invitation.create({
+    data: {
+      userId: user.id,
+      slug: "budi-dan-ani",
+      template: "JAVANESE_TRADITIONAL",
+      groomName: "Budi",
+      groomFullName: "Budi Prasetyo, S.T.",
+      groomParents: "Bapak Drs. Prasetyo Wibowo & Ibu Sri Mulyani",
+      groomPhoto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop&crop=face",
+      groomInstagram: "@budi_prasetyo",
+      brideName: "Ani",
+      brideFullName: "Ani Rahayu, S.E.",
+      brideParents: "Bapak H. Rahayu Santoso & Ibu Hj. Kartini",
+      bridePhoto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face",
+      brideInstagram: "@ani_rahayu",
+      akadDate: "2026-08-15",
+      akadTime: "09:00",
+      akadVenue: "Pendopo Agung Mangkunegaran",
+      akadAddress: "Jl. Ronggowarsito No. 1, Surakarta, Jawa Tengah",
+      resepsiDate: "2026-08-15",
+      resepsiTime: "12:00",
+      resepsiVenue: "Gedung Graha Saba Buana",
+      resepsiAddress: "Jl. Langen Harjo No. 1, Surakarta, Jawa Tengah",
+      mapsLink: "https://maps.google.com/?q=Graha+Saba+Buana+Solo",
+      gallery: [
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=600",
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600",
+        "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600",
+        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600",
+      ],
+      galleryCaptions: [
+        "Prewedding Adat Jawa",
+        "Lamaran",
+        "Siraman",
+        "Midodareni",
+      ],
+      quote: "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang. (QS. Ar-Rum: 21)",
+      message: "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kami.",
+      musicChoice: "romantic1",
+      published: true,
+    },
+  });
+
+  // Create sample RSVPs for invitation 2
+  await prisma.rSVP.create({
+    data: {
+      invitationId: invitation2.id,
+      name: "Sari Dewi",
+      attendance: "HADIR",
+      guests: 2,
+      message: "Selamat menempuh hidup baru Budi & Ani! Semoga menjadi keluarga sakinah mawaddah warahmah.",
+    },
+  });
+
+  // Create sample RSVPs for invitation 1
   const rsvpData = [
     { name: "Budi Santoso", attendance: "HADIR" as const, guests: 2, message: "Selamat menempuh hidup baru! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah. Aamiin 🤲" },
     { name: "Rina Wati", attendance: "HADIR" as const, guests: 3, message: "Barakallahu lakuma wa baraka 'alaikuma wa jama'a bainakuma fi khair. Selamat ya!" },
@@ -92,7 +147,8 @@ async function main() {
 
   console.log("✅ Seed completed!");
   console.log(`   User: demo@wirnikah.com / password123`);
-  console.log(`   Invitation: /undangan/ahmad-dan-sarah`);
+  console.log(`   Invitation 1: /undangan/ahmad-dan-sarah`);
+  console.log(`   Invitation 2: /undangan/budi-dan-ani`);
 }
 
 main()

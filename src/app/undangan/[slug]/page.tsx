@@ -10,7 +10,7 @@ import {
 interface InvitationData {
   id: string;
   slug: string;
-  template: "ELEGANT_GOLD" | "GARDEN_ROMANCE" | "MODERN_MINIMALIST";
+  template: "ELEGANT_GOLD" | "GARDEN_ROMANCE" | "MODERN_MINIMALIST" | "RUSTIC_VINTAGE" | "JAVANESE_TRADITIONAL" | "ISLAMIC_ELEGANT" | "CHERRY_BLOSSOM" | "NAVY_LUXURY" | "TROPICAL_PARADISE" | "SAGE_EUCALYPTUS";
   groomName: string;
   groomFullName: string;
   groomParents: string;
@@ -56,6 +56,7 @@ const themeColors = {
     border: "border-amber-300",
     button: "bg-amber-700 hover:bg-amber-800",
     card: "bg-white/80 backdrop-blur-sm border-amber-200",
+    fontClass: "font-serif",
   },
   GARDEN_ROMANCE: {
     primary: "#2D5016",
@@ -67,6 +68,7 @@ const themeColors = {
     border: "border-green-300",
     button: "bg-green-700 hover:bg-green-800",
     card: "bg-white/80 backdrop-blur-sm border-green-200",
+    fontClass: "font-serif italic",
   },
   MODERN_MINIMALIST: {
     primary: "#1a1a1a",
@@ -78,6 +80,91 @@ const themeColors = {
     border: "border-gray-300",
     button: "bg-gray-900 hover:bg-gray-800",
     card: "bg-white/90 backdrop-blur-sm border-gray-200",
+    fontClass: "font-sans",
+  },
+  RUSTIC_VINTAGE: {
+    primary: "#8B4513",
+    secondary: "#F5DEB3",
+    accent: "#654321",
+    bg: "bg-gradient-to-b from-orange-50 via-amber-50 to-orange-50",
+    text: "text-amber-950",
+    textLight: "text-amber-800",
+    border: "border-orange-300",
+    button: "bg-amber-800 hover:bg-amber-900",
+    card: "bg-orange-50/80 backdrop-blur-sm border-orange-200",
+    fontClass: "font-serif",
+  },
+  JAVANESE_TRADITIONAL: {
+    primary: "#8B0000",
+    secondary: "#FFD700",
+    accent: "#4A0000",
+    bg: "bg-gradient-to-b from-red-50 via-yellow-50 to-red-50",
+    text: "text-red-950",
+    textLight: "text-red-800",
+    border: "border-red-400",
+    button: "bg-red-800 hover:bg-red-900",
+    card: "bg-yellow-50/80 backdrop-blur-sm border-red-200",
+    fontClass: "font-serif",
+  },
+  ISLAMIC_ELEGANT: {
+    primary: "#006400",
+    secondary: "#F0FFF0",
+    accent: "#2E8B57",
+    bg: "bg-gradient-to-b from-green-50 via-emerald-50 to-green-50",
+    text: "text-green-950",
+    textLight: "text-green-800",
+    border: "border-green-400",
+    button: "bg-green-800 hover:bg-green-900",
+    card: "bg-emerald-50/80 backdrop-blur-sm border-green-200",
+    fontClass: "font-serif",
+  },
+  CHERRY_BLOSSOM: {
+    primary: "#FF69B4",
+    secondary: "#FFF0F5",
+    accent: "#FFB7C5",
+    bg: "bg-gradient-to-b from-pink-50 via-rose-50 to-pink-50",
+    text: "text-pink-950",
+    textLight: "text-pink-700",
+    border: "border-pink-300",
+    button: "bg-pink-600 hover:bg-pink-700",
+    card: "bg-pink-50/80 backdrop-blur-sm border-pink-200",
+    fontClass: "font-sans",
+  },
+  NAVY_LUXURY: {
+    primary: "#1B1F3B",
+    secondary: "#F8F8FF",
+    accent: "#C0C0C0",
+    bg: "bg-gradient-to-b from-slate-100 via-blue-50 to-slate-100",
+    text: "text-slate-900",
+    textLight: "text-slate-600",
+    border: "border-blue-300",
+    button: "bg-slate-800 hover:bg-slate-900",
+    card: "bg-white/90 backdrop-blur-sm border-blue-200",
+    fontClass: "font-serif",
+  },
+  TROPICAL_PARADISE: {
+    primary: "#008080",
+    secondary: "#F0F8FF",
+    accent: "#FF7F50",
+    bg: "bg-gradient-to-b from-teal-50 via-cyan-50 to-teal-50",
+    text: "text-teal-950",
+    textLight: "text-teal-700",
+    border: "border-teal-300",
+    button: "bg-teal-700 hover:bg-teal-800",
+    card: "bg-white/80 backdrop-blur-sm border-teal-200",
+    fontClass: "font-sans",
+  },
+  SAGE_EUCALYPTUS: {
+    primary: "#6B8E6B",
+    secondary: "#F5F5DC",
+    accent: "#9CAF88",
+    bg: "bg-gradient-to-b from-green-50 via-lime-50 to-green-50",
+    text: "text-green-950",
+    textLight: "text-green-700",
+    border: "border-green-300",
+    button: "bg-green-700 hover:bg-green-800",
+    card: "bg-white/80 backdrop-blur-sm border-green-200",
+    fontClass: "font-sans",
   },
 };
 
