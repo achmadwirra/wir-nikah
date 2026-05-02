@@ -8,6 +8,15 @@
     --blush: #F8B4C8;
     --forest: #2D5016;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 @layer utilities {
@@ -20,62 +29,42 @@
 
 /* Elegant scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #B8860B;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
-/* Invitation page styles */
-.invitation-section {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 2rem 1rem;
+/* Pulse animation for button */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
-.ornament-border {
-  border: 2px solid var(--gold);
-  border-radius: 1rem;
-  padding: 2rem;
-  position: relative;
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
-.ornament-border::before,
-.ornament-border::after {
-  content: "✦";
-  position: absolute;
-  color: var(--gold);
-  font-size: 1.5rem;
+/* Shimmer effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.ornament-border::before {
-  top: -0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.ornament-border::after {
-  bottom: -0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* Envelope animation */
-@keyframes envelopeOpen {
-  0% { transform: rotateX(0deg); }
-  100% { transform: rotateX(-180deg); }
-}
-
-.envelope-flap {
-  transform-origin: top;
-  animation: envelopeOpen 1s ease-out forwards;
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
 
 /* Fade in animation */
@@ -94,14 +83,18 @@
   animation: fadeInUp 0.8s ease-out forwards;
 }
 
-/* Shimmer effect */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.3), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(184, 134, 11, 0.2);
+  color: inherit;
 }

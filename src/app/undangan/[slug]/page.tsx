@@ -1,16 +1,42 @@
 "use client";
 
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useRef, useCallback, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart, Calendar, Clock, MapPin, Volume2, VolumeX,
-  Send, ChevronDown, Users, ExternalLink
+  Heart,
+  Calendar,
+  Clock,
+  MapPin,
+  Volume2,
+  VolumeX,
+  Send,
+  Users,
+  Play,
+  Pause,
+  Music,
+  X,
 } from "lucide-react";
+
+// ─────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────
+
+type TemplateName =
+  | "ELEGANT_GOLD"
+  | "GARDEN_ROMANCE"
+  | "MODERN_MINIMALIST"
+  | "RUSTIC_VINTAGE"
+  | "JAVANESE_TRADITIONAL"
+  | "ISLAMIC_ELEGANT"
+  | "CHERRY_BLOSSOM"
+  | "NAVY_LUXURY"
+  | "TROPICAL_PARADISE"
+  | "SAGE_EUCALYPTUS";
 
 interface InvitationData {
   id: string;
   slug: string;
-  template: "ELEGANT_GOLD" | "GARDEN_ROMANCE" | "MODERN_MINIMALIST" | "RUSTIC_VINTAGE" | "JAVANESE_TRADITIONAL" | "ISLAMIC_ELEGANT" | "CHERRY_BLOSSOM" | "NAVY_LUXURY" | "TROPICAL_PARADISE" | "SAGE_EUCALYPTUS";
+  template: TemplateName;
   groomName: string;
   groomFullName: string;
   groomParents: string;
@@ -45,147 +71,305 @@ interface InvitationData {
   }[];
 }
 
-const themeColors = {
+// ─────────────────────────────────────────────────────────────
+// Template Styles
+// ─────────────────────────────────────────────────────────────
+
+interface TemplateStyle {
+  bgColor: string;
+  bgGradient: string;
+  primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
+  textMuted: string;
+  cardBg: string;
+  borderColor: string;
+  buttonBg: string;
+  buttonText: string;
+  fontClass: string;
+  ornamentChar: string;
+}
+
+const templateStyles: Record<TemplateName, TemplateStyle> = {
   ELEGANT_GOLD: {
-    primary: "#B8860B",
-    secondary: "#FFF8DC",
-    accent: "#8B7355",
-    bg: "bg-gradient-to-b from-amber-50 via-yellow-50 to-amber-50",
-    text: "text-amber-900",
-    textLight: "text-amber-700",
-    border: "border-amber-300",
-    button: "bg-amber-700 hover:bg-amber-800",
-    card: "bg-white/80 backdrop-blur-sm border-amber-200",
+    bgColor: "#FFFDF7",
+    bgGradient: "linear-gradient(180deg, #FFFDF7 0%, #FFF8E7 30%, #FFFDF7 60%, #FFF8E7 100%)",
+    primaryColor: "#B8860B",
+    secondaryColor: "#D4A843",
+    textColor: "#3D2B1F",
+    textMuted: "#7A6348",
+    cardBg: "rgba(255,255,255,0.85)",
+    borderColor: "#D4A843",
+    buttonBg: "#B8860B",
+    buttonText: "#FFFFFF",
     fontClass: "font-serif",
+    ornamentChar: "✦",
   },
   GARDEN_ROMANCE: {
-    primary: "#2D5016",
-    secondary: "#F8B4C8",
-    accent: "#4a7c59",
-    bg: "bg-gradient-to-b from-green-50 via-pink-50 to-green-50",
-    text: "text-green-900",
-    textLight: "text-green-700",
-    border: "border-green-300",
-    button: "bg-green-700 hover:bg-green-800",
-    card: "bg-white/80 backdrop-blur-sm border-green-200",
-    fontClass: "font-serif italic",
+    bgColor: "#FFFBFC",
+    bgGradient: "linear-gradient(180deg, #FFFBFC 0%, #FFF0F3 30%, #F0FFF4 60%, #FFFBFC 100%)",
+    primaryColor: "#BE185D",
+    secondaryColor: "#4A7C59",
+    textColor: "#1F2937",
+    textMuted: "#6B7280",
+    cardBg: "rgba(255,255,255,0.9)",
+    borderColor: "#F9A8D4",
+    buttonBg: "#BE185D",
+    buttonText: "#FFFFFF",
+    fontClass: "font-serif",
+    ornamentChar: "❀",
   },
   MODERN_MINIMALIST: {
-    primary: "#1a1a1a",
-    secondary: "#ffffff",
-    accent: "#666666",
-    bg: "bg-gradient-to-b from-gray-50 via-white to-gray-50",
-    text: "text-gray-900",
-    textLight: "text-gray-600",
-    border: "border-gray-300",
-    button: "bg-gray-900 hover:bg-gray-800",
-    card: "bg-white/90 backdrop-blur-sm border-gray-200",
+    bgColor: "#FFFFFF",
+    bgGradient: "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 30%, #FFFFFF 60%, #F9FAFB 100%)",
+    primaryColor: "#111827",
+    secondaryColor: "#6B7280",
+    textColor: "#111827",
+    textMuted: "#6B7280",
+    cardBg: "rgba(249,250,251,0.9)",
+    borderColor: "#E5E7EB",
+    buttonBg: "#111827",
+    buttonText: "#FFFFFF",
     fontClass: "font-sans",
+    ornamentChar: "◆",
   },
   RUSTIC_VINTAGE: {
-    primary: "#8B4513",
-    secondary: "#F5DEB3",
-    accent: "#654321",
-    bg: "bg-gradient-to-b from-orange-50 via-amber-50 to-orange-50",
-    text: "text-amber-950",
-    textLight: "text-amber-800",
-    border: "border-orange-300",
-    button: "bg-amber-800 hover:bg-amber-900",
-    card: "bg-orange-50/80 backdrop-blur-sm border-orange-200",
+    bgColor: "#FAF5EF",
+    bgGradient: "linear-gradient(180deg, #FAF5EF 0%, #F5EBE0 30%, #FAF5EF 60%, #F5EBE0 100%)",
+    primaryColor: "#8B4513",
+    secondaryColor: "#A0522D",
+    textColor: "#3E2723",
+    textMuted: "#6D4C41",
+    cardBg: "rgba(255,253,248,0.85)",
+    borderColor: "#D2B48C",
+    buttonBg: "#8B4513",
+    buttonText: "#FFFFFF",
     fontClass: "font-serif",
+    ornamentChar: "❧",
   },
   JAVANESE_TRADITIONAL: {
-    primary: "#8B0000",
-    secondary: "#FFD700",
-    accent: "#4A0000",
-    bg: "bg-gradient-to-b from-red-50 via-yellow-50 to-red-50",
-    text: "text-red-950",
-    textLight: "text-red-800",
-    border: "border-red-400",
-    button: "bg-red-800 hover:bg-red-900",
-    card: "bg-yellow-50/80 backdrop-blur-sm border-red-200",
+    bgColor: "#FFF8F0",
+    bgGradient: "linear-gradient(180deg, #2D0A0A 0%, #4A1010 30%, #2D0A0A 60%, #1A0505 100%)",
+    primaryColor: "#FFD700",
+    secondaryColor: "#DAA520",
+    textColor: "#FFF8DC",
+    textMuted: "#F5DEB3",
+    cardBg: "rgba(74,16,16,0.7)",
+    borderColor: "#FFD700",
+    buttonBg: "#DAA520",
+    buttonText: "#1A0505",
     fontClass: "font-serif",
+    ornamentChar: "✦",
   },
   ISLAMIC_ELEGANT: {
-    primary: "#006400",
-    secondary: "#F0FFF0",
-    accent: "#2E8B57",
-    bg: "bg-gradient-to-b from-green-50 via-emerald-50 to-green-50",
-    text: "text-green-950",
-    textLight: "text-green-800",
-    border: "border-green-400",
-    button: "bg-green-800 hover:bg-green-900",
-    card: "bg-emerald-50/80 backdrop-blur-sm border-green-200",
+    bgColor: "#F0FFF4",
+    bgGradient: "linear-gradient(180deg, #F0FFF4 0%, #ECFDF5 30%, #F0FFF4 60%, #ECFDF5 100%)",
+    primaryColor: "#166534",
+    secondaryColor: "#B8860B",
+    textColor: "#14532D",
+    textMuted: "#3F6212",
+    cardBg: "rgba(255,255,255,0.88)",
+    borderColor: "#86EFAC",
+    buttonBg: "#166534",
+    buttonText: "#FFFFFF",
     fontClass: "font-serif",
+    ornamentChar: "❋",
   },
   CHERRY_BLOSSOM: {
-    primary: "#FF69B4",
-    secondary: "#FFF0F5",
-    accent: "#FFB7C5",
-    bg: "bg-gradient-to-b from-pink-50 via-rose-50 to-pink-50",
-    text: "text-pink-950",
-    textLight: "text-pink-700",
-    border: "border-pink-300",
-    button: "bg-pink-600 hover:bg-pink-700",
-    card: "bg-pink-50/80 backdrop-blur-sm border-pink-200",
+    bgColor: "#FFF5F7",
+    bgGradient: "linear-gradient(180deg, #FFF5F7 0%, #FFE4E9 30%, #FFF5F7 60%, #FFE4E9 100%)",
+    primaryColor: "#EC4899",
+    secondaryColor: "#F9A8D4",
+    textColor: "#831843",
+    textMuted: "#9D174D",
+    cardBg: "rgba(255,255,255,0.85)",
+    borderColor: "#FBCFE8",
+    buttonBg: "#EC4899",
+    buttonText: "#FFFFFF",
     fontClass: "font-sans",
+    ornamentChar: "✿",
   },
   NAVY_LUXURY: {
-    primary: "#1B1F3B",
-    secondary: "#F8F8FF",
-    accent: "#C0C0C0",
-    bg: "bg-gradient-to-b from-slate-100 via-blue-50 to-slate-100",
-    text: "text-slate-900",
-    textLight: "text-slate-600",
-    border: "border-blue-300",
-    button: "bg-slate-800 hover:bg-slate-900",
-    card: "bg-white/90 backdrop-blur-sm border-blue-200",
+    bgColor: "#0F172A",
+    bgGradient: "linear-gradient(180deg, #0F172A 0%, #1E293B 30%, #0F172A 60%, #1E293B 100%)",
+    primaryColor: "#C9A961",
+    secondaryColor: "#E2C97E",
+    textColor: "#F8FAFC",
+    textMuted: "#CBD5E1",
+    cardBg: "rgba(30,41,59,0.8)",
+    borderColor: "#C9A961",
+    buttonBg: "#C9A961",
+    buttonText: "#0F172A",
     fontClass: "font-serif",
+    ornamentChar: "✦",
   },
   TROPICAL_PARADISE: {
-    primary: "#008080",
-    secondary: "#F0F8FF",
-    accent: "#FF7F50",
-    bg: "bg-gradient-to-b from-teal-50 via-cyan-50 to-teal-50",
-    text: "text-teal-950",
-    textLight: "text-teal-700",
-    border: "border-teal-300",
-    button: "bg-teal-700 hover:bg-teal-800",
-    card: "bg-white/80 backdrop-blur-sm border-teal-200",
+    bgColor: "#F0FDFA",
+    bgGradient: "linear-gradient(180deg, #F0FDFA 0%, #E0F7FA 30%, #F0FDFA 60%, #E0F7FA 100%)",
+    primaryColor: "#0D9488",
+    secondaryColor: "#F97316",
+    textColor: "#134E4A",
+    textMuted: "#5EEAD4",
+    cardBg: "rgba(255,255,255,0.88)",
+    borderColor: "#5EEAD4",
+    buttonBg: "#0D9488",
+    buttonText: "#FFFFFF",
     fontClass: "font-sans",
+    ornamentChar: "❋",
   },
   SAGE_EUCALYPTUS: {
-    primary: "#6B8E6B",
-    secondary: "#F5F5DC",
-    accent: "#9CAF88",
-    bg: "bg-gradient-to-b from-green-50 via-lime-50 to-green-50",
-    text: "text-green-950",
-    textLight: "text-green-700",
-    border: "border-green-300",
-    button: "bg-green-700 hover:bg-green-800",
-    card: "bg-white/80 backdrop-blur-sm border-green-200",
+    bgColor: "#F8FAF5",
+    bgGradient: "linear-gradient(180deg, #F8FAF5 0%, #ECFCCB 30%, #F8FAF5 60%, #ECFCCB 100%)",
+    primaryColor: "#4D7C0F",
+    secondaryColor: "#84CC16",
+    textColor: "#1A2E05",
+    textMuted: "#4D7C0F",
+    cardBg: "rgba(255,255,255,0.88)",
+    borderColor: "#BEF264",
+    buttonBg: "#4D7C0F",
+    buttonText: "#FFFFFF",
     fontClass: "font-sans",
+    ornamentChar: "❦",
   },
 };
 
-export default function UndanganPage({ params }: { params: Promise<{ slug: string }> }) {
+// ─────────────────────────────────────────────────────────────
+// Ornamental Components
+// ─────────────────────────────────────────────────────────────
+
+function OrnamentalDivider({ color, char }: { color: string; char: string }) {
+  return (
+    <div className="flex items-center justify-center gap-3 my-6 select-none">
+      <span
+        className="block h-px w-12 sm:w-20"
+        style={{ background: `linear-gradient(to right, transparent, ${color})` }}
+      />
+      <span style={{ color }} className="text-lg">
+        {char}
+      </span>
+      <span
+        className="block h-px w-12 sm:w-20"
+        style={{ background: `linear-gradient(to left, transparent, ${color})` }}
+      />
+    </div>
+  );
+}
+
+function OrnamentalFrame({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style: TemplateStyle;
+}) {
+  return (
+    <div
+      className="relative rounded-2xl p-6 sm:p-8"
+      style={{
+        background: style.cardBg,
+        border: `2px solid ${style.borderColor}`,
+        boxShadow: `0 0 30px ${style.borderColor}22, inset 0 0 30px ${style.borderColor}08`,
+      }}
+    >
+      {/* Corner ornaments */}
+      <span
+        className="absolute top-2 left-3 text-xl select-none opacity-60"
+        style={{ color: style.borderColor }}
+      >
+        ❦
+      </span>
+      <span
+        className="absolute top-2 right-3 text-xl select-none opacity-60"
+        style={{ color: style.borderColor, transform: "scaleX(-1)" }}
+      >
+        ❦
+      </span>
+      <span
+        className="absolute bottom-2 left-3 text-xl select-none opacity-60"
+        style={{ color: style.borderColor, transform: "scaleY(-1)" }}
+      >
+        ❦
+      </span>
+      <span
+        className="absolute bottom-2 right-3 text-xl select-none opacity-60"
+        style={{ color: style.borderColor, transform: "scale(-1)" }}
+      >
+        ❦
+      </span>
+      {children}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Section Wrapper with Scroll Animation
+// ─────────────────────────────────────────────────────────────
+
+function Section({
+  children,
+  className = "",
+  id,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <motion.section
+      id={id}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className={`min-h-screen flex flex-col items-center justify-center px-4 py-16 sm:py-20 ${className}`}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main Page Component
+// ─────────────────────────────────────────────────────────────
+
+export default function UndanganPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = use(params);
   const [data, setData] = useState<InvitationData | null>(null);
   const [opened, setOpened] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [rsvpForm, setRsvpForm] = useState({ name: "", attendance: "HADIR", guests: 1, message: "" });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+  const [rsvpForm, setRsvpForm] = useState({
+    name: "",
+    attendance: "HADIR",
+    guests: 1,
+    message: "",
+  });
   const [rsvpSent, setRsvpSent] = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
+  // Fetch invitation data
   useEffect(() => {
     fetch(`/api/undangan/${slug}`)
       .then((r) => r.json())
-      .then((d) => { if (!d.error) setData(d); });
+      .then((d) => {
+        if (!d.error) setData(d);
+      })
+      .catch(() => {});
   }, [slug]);
 
+  // Countdown timer
   useEffect(() => {
     if (!data) return;
     const target = new Date(`${data.akadDate}T${data.akadTime}`).getTime();
@@ -202,587 +386,1104 @@ export default function UndanganPage({ params }: { params: Promise<{ slug: strin
     return () => clearInterval(interval);
   }, [data]);
 
-  const toggleMusic = () => {
+  const toggleMusic = useCallback(() => {
     if (!audioRef.current) return;
-    if (muted) {
-      audioRef.current.play().catch(() => {});
-      setMuted(false);
-    } else {
+    if (isPlaying) {
       audioRef.current.pause();
-      setMuted(true);
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
     }
-  };
+  }, [isPlaying]);
 
   const handleOpen = () => {
     setOpened(true);
+    setTimeout(() => {
+      contentRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
     if (audioRef.current) {
       audioRef.current.play().catch(() => {});
-      setMuted(false);
+      setIsPlaying(true);
     }
   };
 
   const handleRsvp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!data) return;
     setRsvpLoading(true);
     try {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...rsvpForm, invitationId: data!.id }),
+        body: JSON.stringify({ ...rsvpForm, invitationId: data.id }),
       });
       if (res.ok) {
         setRsvpSent(true);
         const newRsvp = await res.json();
-        setData((prev) => prev ? { ...prev, rsvps: [newRsvp, ...prev.rsvps] } : prev);
+        setData((prev) =>
+          prev ? { ...prev, rsvps: [newRsvp, ...prev.rsvps] } : prev
+        );
       }
     } catch {
-      alert("Gagal mengirim RSVP");
+      alert("Gagal mengirim RSVP. Silakan coba lagi.");
     } finally {
       setRsvpLoading(false);
     }
   };
 
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  // ─── Loading State ───
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-amber-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-amber-50 to-white">
         <div className="text-center">
-          <Heart className="w-12 h-12 text-amber-400 mx-auto animate-pulse" />
-          <p className="mt-4 text-amber-700">Memuat undangan...</p>
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <Heart className="w-14 h-14 text-amber-400 mx-auto fill-amber-200" />
+          </motion.div>
+          <p className="mt-6 text-amber-700 font-serif text-lg">
+            Memuat undangan...
+          </p>
         </div>
       </div>
     );
   }
 
-  const theme = themeColors[data.template];
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  };
+  const s = templateStyles[data.template];
 
   return (
-    <div className={`min-h-screen ${theme.bg}`}>
-      {/* Audio */}
+    <div
+      className={`min-h-screen ${s.fontClass}`}
+      style={{ background: s.bgGradient, color: s.textColor }}
+    >
+      {/* Audio Element */}
       <audio ref={audioRef} loop preload="none">
         <source src="/music/romantic.mp3" type="audio/mpeg" />
       </audio>
 
-      {/* Music Toggle */}
-      {opened && (
-        <button
-          onClick={toggleMusic}
-          className="fixed top-4 right-4 z-50 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg border border-gray-200"
-        >
-          {muted ? <VolumeX className="w-5 h-5 text-gray-600" /> : <Volume2 className="w-5 h-5 text-amber-600" />}
-        </button>
-      )}
-
-      {/* Envelope Opening */}
+      {/* ═══════════════════════════════════════════════════════════
+          OPENING SCREEN
+      ═══════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {!opened && (
           <motion.div
-            className="fixed inset-0 z-40 flex items-center justify-center bg-gradient-to-b from-amber-100 to-amber-50"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ background: s.bgGradient }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.6 }}
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center px-6"
+            {/* Decorative border frame */}
+            <div
+              className="absolute inset-4 sm:inset-8 rounded-3xl pointer-events-none"
+              style={{
+                border: `2px solid ${s.borderColor}`,
+                boxShadow: `inset 0 0 60px ${s.primaryColor}10`,
+              }}
+            />
+            {/* Corner decorations */}
+            <span
+              className="absolute top-8 left-8 sm:top-12 sm:left-12 text-3xl sm:text-4xl select-none opacity-40"
+              style={{ color: s.primaryColor }}
             >
-              {/* Envelope */}
-              <div className="relative w-72 h-48 mx-auto mb-8">
-                <div className="absolute inset-0 bg-gradient-to-b from-amber-200 to-amber-100 rounded-lg shadow-xl border-2 border-amber-300" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Heart className="w-8 h-8 text-amber-600 mx-auto fill-amber-600" />
-                    <p className="text-amber-800 font-serif text-lg mt-2">
-                      {data.groomName} & {data.brideName}
-                    </p>
-                  </div>
-                </div>
-                {/* Envelope flap */}
-                <div className="absolute -top-1 left-0 right-0 h-24 overflow-hidden">
-                  <div className="w-0 h-0 mx-auto border-l-[144px] border-r-[144px] border-t-[96px] border-l-transparent border-r-transparent border-t-amber-300" />
-                </div>
-              </div>
+              ❦
+            </span>
+            <span
+              className="absolute top-8 right-8 sm:top-12 sm:right-12 text-3xl sm:text-4xl select-none opacity-40"
+              style={{ color: s.primaryColor, transform: "scaleX(-1)" }}
+            >
+              ❦
+            </span>
+            <span
+              className="absolute bottom-8 left-8 sm:bottom-12 sm:left-12 text-3xl sm:text-4xl select-none opacity-40"
+              style={{ color: s.primaryColor, transform: "scaleY(-1)" }}
+            >
+              ❦
+            </span>
+            <span
+              className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12 text-3xl sm:text-4xl select-none opacity-40"
+              style={{ color: s.primaryColor, transform: "scale(-1)" }}
+            >
+              ❦
+            </span>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-center px-6 max-w-md"
+            >
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-sm uppercase tracking-[0.4em] mb-6"
+                style={{ color: s.textMuted }}
+              >
+                The Wedding of
+              </motion.p>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="text-4xl sm:text-6xl font-bold mb-2"
+                style={{ color: s.primaryColor }}
+              >
+                {data.groomName}
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+                className="my-3"
+              >
+                <span className="text-2xl" style={{ color: s.primaryColor }}>
+                  &
+                </span>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+                className="text-4xl sm:text-6xl font-bold mb-6"
+                style={{ color: s.primaryColor }}
+              >
+                {data.brideName}
+              </motion.h1>
+
+              <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-amber-800 text-lg mb-2"
+                transition={{ delay: 1 }}
+                className="text-sm mb-2"
+                style={{ color: s.textMuted }}
               >
-                Anda Diundang ke Pernikahan
+                {formatDate(data.akadDate)}
               </motion.p>
-              <motion.p
+
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="text-amber-900 font-serif text-2xl font-bold mb-8"
+                transition={{ delay: 1.2 }}
+                className="mt-8 mb-6"
               >
-                {data.groomName} & {data.brideName}
-              </motion.p>
+                <p className="text-xs uppercase tracking-widest mb-1" style={{ color: s.textMuted }}>
+                  Kepada Yth.
+                </p>
+                <p className="text-lg font-medium" style={{ color: s.textColor }}>
+                  Bapak/Ibu/Saudara/i
+                </p>
+              </motion.div>
+
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
+                transition={{ delay: 1.5 }}
                 onClick={handleOpen}
-                className="bg-amber-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-amber-800 transition shadow-lg"
+                className="relative px-8 py-3.5 rounded-full font-semibold text-sm tracking-wide shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+                style={{
+                  backgroundColor: s.buttonBg,
+                  color: s.buttonText,
+                }}
               >
-                Buka Undangan
+                {/* Pulse ring */}
+                <span
+                  className="absolute inset-0 rounded-full animate-ping opacity-20"
+                  style={{ backgroundColor: s.buttonBg }}
+                />
+                <span className="relative flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Buka Undangan
+                </span>
               </motion.button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
+      {/* ═══════════════════════════════════════════════════════════
+          MAIN CONTENT
+      ═══════════════════════════════════════════════════════════ */}
       {opened && (
-        <div className="relative">
-          {/* Section 1: Cover */}
-          <section className="invitation-section relative overflow-hidden">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
-              className="text-center z-10"
+        <>
+          {/* Music Player - Fixed Bottom */}
+          <motion.div
+            initial={{ y: 80 }}
+            animate={{ y: 0 }}
+            transition={{ delay: 0.5, type: "spring" }}
+            className="fixed bottom-0 left-0 right-0 z-50"
+          >
+            <div
+              className="mx-auto max-w-md flex items-center justify-between px-4 py-3 backdrop-blur-xl rounded-t-2xl shadow-2xl border-t"
+              style={{
+                background: `${s.cardBg}`,
+                borderColor: s.borderColor,
+              }}
             >
-              <p className={`text-sm uppercase tracking-[0.3em] ${theme.textLight} mb-4`}>The Wedding of</p>
-              <h1 className={`font-serif text-5xl sm:text-7xl font-bold ${theme.text} mb-4`}>
-                {data.groomName}
-              </h1>
-              <div className="flex items-center justify-center gap-4 my-4">
-                <div className="w-16 h-px bg-current opacity-30" />
-                <Heart className="w-6 h-6 fill-current opacity-50" style={{ color: theme.primary }} />
-                <div className="w-16 h-px bg-current opacity-30" />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleMusic}
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  style={{ backgroundColor: s.buttonBg, color: s.buttonText }}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4" />
+                  ) : (
+                    <Play className="w-4 h-4 ml-0.5" />
+                  )}
+                </button>
+                <div>
+                  <p className="text-xs font-medium" style={{ color: s.textColor }}>
+                    Wedding Music
+                  </p>
+                  <p className="text-[10px]" style={{ color: s.textMuted }}>
+                    {isPlaying ? "Now Playing" : "Paused"}
+                  </p>
+                </div>
               </div>
-              <h1 className={`font-serif text-5xl sm:text-7xl font-bold ${theme.text} mb-6`}>
-                {data.brideName}
-              </h1>
-              <p className={`${theme.textLight} text-lg`}>{formatDate(data.akadDate)}</p>
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="mt-12"
+              <button
+                onClick={toggleMusic}
+                className="p-2 rounded-full transition-all hover:scale-110"
+                style={{ color: s.primaryColor }}
               >
-                <ChevronDown className="w-6 h-6 mx-auto opacity-50" style={{ color: theme.primary }} />
-              </motion.div>
-            </motion.div>
-          </section>
+                {isPlaying ? (
+                  <Volume2 className="w-5 h-5" />
+                ) : (
+                  <VolumeX className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </motion.div>
 
-          {/* Section 2: Bismillah / Quotes */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="max-w-2xl mx-auto text-center px-4"
-            >
-              <p className="text-4xl mb-6" style={{ color: theme.primary }}>﷽</p>
-              <div className={`ornament-border ${theme.card} border`}>
-                <p className={`font-serif text-lg sm:text-xl leading-relaxed italic ${theme.text}`}>
-                  &ldquo;{data.quote}&rdquo;
-                </p>
+          <div ref={contentRef}>
+            {/* ─── Section 1: Bismillah ─── */}
+            <Section id="bismillah">
+              <div className="max-w-lg mx-auto text-center">
+                <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1 }}
+                  className="text-3xl sm:text-4xl leading-relaxed mb-6 font-serif"
+                  style={{ color: s.primaryColor }}
+                  dir="rtl"
+                >
+                  بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
+                </motion.p>
+
+                <OrnamentalFrame style={s}>
+                  <p
+                    className="text-xl sm:text-2xl leading-relaxed mb-4 font-serif"
+                    style={{ color: s.primaryColor }}
+                    dir="rtl"
+                  >
+                    وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
+                    لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً ۚ
+                    إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ
+                  </p>
+                  <OrnamentalDivider color={s.borderColor} char="◆" />
+                  <p
+                    className="text-sm sm:text-base leading-relaxed italic"
+                    style={{ color: s.textMuted }}
+                  >
+                    &ldquo;Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia
+                    menciptakan pasangan-pasangan untukmu dari jenismu sendiri,
+                    agar kamu cenderung dan merasa tenteram kepadanya, dan Dia
+                    menjadikan di antaramu rasa kasih dan sayang. Sungguh, pada
+                    yang demikian itu benar-benar terdapat tanda-tanda (kebesaran
+                    Allah) bagi kaum yang berpikir.&rdquo;
+                  </p>
+                  <p
+                    className="text-xs mt-3 font-medium"
+                    style={{ color: s.primaryColor }}
+                  >
+                    — QS. Ar-Rum: 21
+                  </p>
+                </OrnamentalFrame>
+
+                <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
               </div>
-            </motion.div>
-          </section>
+            </Section>
 
-          {/* Section 3: Mempelai */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto w-full px-4"
-            >
-              <h2 className={`text-center font-serif text-3xl ${theme.text} mb-12`}>Mempelai</h2>
-              <div className="grid sm:grid-cols-2 gap-12 items-center">
+            {/* ─── Section 2: Mempelai ─── */}
+            <Section id="mempelai">
+              <div className="max-w-2xl mx-auto text-center w-full">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  className="text-lg sm:text-xl mb-2"
+                  style={{ color: s.primaryColor }}
+                >
+                  Assalamualaikum Wr. Wb.
+                </motion.p>
+                <p
+                  className="text-sm sm:text-base leading-relaxed mb-10 max-w-md mx-auto"
+                  style={{ color: s.textMuted }}
+                >
+                  Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud
+                  menyelenggarakan pernikahan putra-putri kami:
+                </p>
+
                 {/* Groom */}
                 <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-center"
+                  transition={{ duration: 0.6 }}
+                  className="mb-8"
                 >
-                  <div className="relative w-48 h-48 mx-auto mb-6">
-                    <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: theme.primary }} />
+                  <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-4">
+                    {/* Decorative ring */}
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        border: `3px solid ${s.borderColor}`,
+                        boxShadow: `0 0 20px ${s.borderColor}40`,
+                      }}
+                    />
+                    <div
+                      className="absolute -inset-2 rounded-full opacity-30"
+                      style={{ border: `1px dashed ${s.borderColor}` }}
+                    />
                     <div className="absolute inset-2 rounded-full overflow-hidden bg-gray-200">
-                      <img src={data.groomPhoto || "/placeholder.jpg"} alt={data.groomName} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.primary }}>
-                      <span className="text-white text-xs">♂</span>
+                      <img
+                        src={data.groomPhoto || "/placeholder.jpg"}
+                        alt={data.groomName}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
-                  <h3 className={`font-serif text-2xl font-bold ${theme.text}`}>{data.groomFullName}</h3>
-                  <p className={`${theme.textLight} mt-2`}>Putra dari</p>
-                  <p className={`${theme.text} font-medium`}>{data.groomParents}</p>
-                  {data.groomInstagram && (
-                    <a href={`https://instagram.com/${data.groomInstagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 mt-3 ${theme.textLight} hover:opacity-70`}>
-                      <ExternalLink className="w-4 h-4" /> {data.groomInstagram}
-                    </a>
-                  )}
+                  <h3
+                    className="text-2xl sm:text-3xl font-bold mb-1"
+                    style={{ color: s.primaryColor }}
+                  >
+                    {data.groomFullName}
+                  </h3>
+                  <p className="text-sm" style={{ color: s.textMuted }}>
+                    Putra dari Bapak & Ibu
+                  </p>
+                  <p className="font-medium text-sm" style={{ color: s.textColor }}>
+                    {data.groomParents}
+                  </p>
+                </motion.div>
+
+                {/* Ornamental & */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                  className="my-6"
+                >
+                  <span
+                    className="inline-block text-5xl sm:text-6xl font-serif"
+                    style={{ color: s.primaryColor }}
+                  >
+                    &amp;
+                  </span>
                 </motion.div>
 
                 {/* Bride */}
                 <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-center"
+                  transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  <div className="relative w-48 h-48 mx-auto mb-6">
-                    <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: theme.primary }} />
+                  <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-4">
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        border: `3px solid ${s.borderColor}`,
+                        boxShadow: `0 0 20px ${s.borderColor}40`,
+                      }}
+                    />
+                    <div
+                      className="absolute -inset-2 rounded-full opacity-30"
+                      style={{ border: `1px dashed ${s.borderColor}` }}
+                    />
                     <div className="absolute inset-2 rounded-full overflow-hidden bg-gray-200">
-                      <img src={data.bridePhoto || "/placeholder.jpg"} alt={data.brideName} className="w-full h-full object-cover" />
+                      <img
+                        src={data.bridePhoto || "/placeholder.jpg"}
+                        alt={data.brideName}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.primary }}>
-                      <span className="text-white text-xs">♀</span>
-                    </div>
                   </div>
-                  <h3 className={`font-serif text-2xl font-bold ${theme.text}`}>{data.brideFullName}</h3>
-                  <p className={`${theme.textLight} mt-2`}>Putri dari</p>
-                  <p className={`${theme.text} font-medium`}>{data.brideParents}</p>
-                  {data.brideInstagram && (
-                    <a href={`https://instagram.com/${data.brideInstagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 mt-3 ${theme.textLight} hover:opacity-70`}>
-                      <ExternalLink className="w-4 h-4" /> {data.brideInstagram}
-                    </a>
-                  )}
-                </motion.div>
-              </div>
-            </motion.div>
-          </section>
-
-          {/* Section 4: Countdown */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <h2 className={`font-serif text-3xl ${theme.text} mb-2`}>Menuju Hari Bahagia</h2>
-              <p className={`${theme.textLight} mb-8`}>{formatDate(data.akadDate)}</p>
-              <div className="flex justify-center gap-4 sm:gap-8">
-                {[
-                  { value: countdown.days, label: "Hari" },
-                  { value: countdown.hours, label: "Jam" },
-                  { value: countdown.minutes, label: "Menit" },
-                  { value: countdown.seconds, label: "Detik" },
-                ].map((item) => (
-                  <motion.div
-                    key={item.label}
-                    className={`${theme.card} border rounded-xl p-4 sm:p-6 min-w-[70px] sm:min-w-[90px]`}
-                    animate={{ scale: item.label === "Detik" ? [1, 1.02, 1] : 1 }}
-                    transition={{ repeat: Infinity, duration: 1 }}
+                  <h3
+                    className="text-2xl sm:text-3xl font-bold mb-1"
+                    style={{ color: s.primaryColor }}
                   >
-                    <p className={`text-3xl sm:text-4xl font-bold ${theme.text}`}>
-                      {String(item.value).padStart(2, "0")}
-                    </p>
-                    <p className={`text-xs sm:text-sm ${theme.textLight} mt-1`}>{item.label}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </section>
-
-          {/* Section 5: Acara */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-3xl mx-auto w-full px-4"
-            >
-              <h2 className={`text-center font-serif text-3xl ${theme.text} mb-12`}>Waktu & Tempat</h2>
-              <div className="grid sm:grid-cols-2 gap-6">
-                {/* Akad */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className={`${theme.card} border rounded-2xl p-6 text-center`}
-                >
-                  <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${theme.primary}20` }}>
-                    <Calendar className="w-6 h-6" style={{ color: theme.primary }} />
-                  </div>
-                  <h3 className={`font-serif text-xl font-bold ${theme.text} mb-3`}>Akad Nikah</h3>
-                  <p className={`${theme.textLight} mb-1`}>{formatDate(data.akadDate)}</p>
-                  <p className={`${theme.text} font-medium flex items-center justify-center gap-1`}>
-                    <Clock className="w-4 h-4" /> {data.akadTime} WIB
+                    {data.brideFullName}
+                  </h3>
+                  <p className="text-sm" style={{ color: s.textMuted }}>
+                    Putri dari Bapak & Ibu
                   </p>
-                  <div className="mt-4 pt-4 border-t" style={{ borderColor: `${theme.primary}30` }}>
-                    <p className={`font-medium ${theme.text}`}>{data.akadVenue}</p>
-                    <p className={`text-sm ${theme.textLight} mt-1`}>{data.akadAddress}</p>
-                  </div>
-                </motion.div>
-
-                {/* Resepsi */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                  className={`${theme.card} border rounded-2xl p-6 text-center`}
-                >
-                  <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${theme.primary}20` }}>
-                    <Heart className="w-6 h-6" style={{ color: theme.primary }} />
-                  </div>
-                  <h3 className={`font-serif text-xl font-bold ${theme.text} mb-3`}>Resepsi</h3>
-                  <p className={`${theme.textLight} mb-1`}>{formatDate(data.resepsiDate)}</p>
-                  <p className={`${theme.text} font-medium flex items-center justify-center gap-1`}>
-                    <Clock className="w-4 h-4" /> {data.resepsiTime} WIB
+                  <p className="font-medium text-sm" style={{ color: s.textColor }}>
+                    {data.brideParents}
                   </p>
-                  <div className="mt-4 pt-4 border-t" style={{ borderColor: `${theme.primary}30` }}>
-                    <p className={`font-medium ${theme.text}`}>{data.resepsiVenue}</p>
-                    <p className={`text-sm ${theme.textLight} mt-1`}>{data.resepsiAddress}</p>
-                  </div>
                 </motion.div>
               </div>
+            </Section>
 
-              {data.mapsLink && (
-                <div className="text-center mt-8">
-                  <a
-                    href={data.mapsLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-2 ${theme.button} text-white px-6 py-3 rounded-full font-medium transition`}
-                  >
-                    <MapPin className="w-5 h-5" />
-                    Lihat di Google Maps
-                  </a>
-                </div>
-              )}
-            </motion.div>
-          </section>
-
-          {/* Section 6: Gallery */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto w-full px-4"
-            >
-              <h2 className={`text-center font-serif text-3xl ${theme.text} mb-12`}>Our Gallery</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {data.gallery.filter(Boolean).map((url, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:shadow-xl transition group"
-                    onClick={() => setLightbox(i)}
-                  >
-                    <img
-                      src={url}
-                      alt={data.galleryCaptions[i] || `Photo ${i + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </section>
-
-          {/* Lightbox */}
-          <AnimatePresence>
-            {lightbox !== null && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-                onClick={() => setLightbox(null)}
-              >
-                <motion.img
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8 }}
-                  src={data.gallery[lightbox]}
-                  alt=""
-                  className="max-w-full max-h-[80vh] rounded-xl object-contain"
-                />
-                <p className="absolute bottom-8 text-white text-center">
-                  {data.galleryCaptions[lightbox]}
+            {/* ─── Section 3: Countdown ─── */}
+            <Section id="countdown">
+              <div className="text-center max-w-lg mx-auto">
+                <h2
+                  className="text-2xl sm:text-3xl font-bold mb-2"
+                  style={{ color: s.primaryColor }}
+                >
+                  Menghitung Hari
+                </h2>
+                <p className="text-sm mb-8" style={{ color: s.textMuted }}>
+                  {formatDate(data.akadDate)}
                 </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Section 7: RSVP */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-lg mx-auto w-full px-4"
-            >
-              <h2 className={`text-center font-serif text-3xl ${theme.text} mb-4`}>RSVP</h2>
-              <p className={`text-center ${theme.textLight} mb-8`}>Konfirmasi Kehadiran Anda</p>
+                <div className="grid grid-cols-4 gap-3 sm:gap-5">
+                  {(
+                    [
+                      { value: countdown.days, label: "Hari" },
+                      { value: countdown.hours, label: "Jam" },
+                      { value: countdown.minutes, label: "Menit" },
+                      { value: countdown.seconds, label: "Detik" },
+                    ] as const
+                  ).map((item, idx) => (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="rounded-2xl p-4 sm:p-5 text-center"
+                      style={{
+                        background: s.cardBg,
+                        border: `1.5px solid ${s.borderColor}`,
+                        boxShadow: `0 4px 20px ${s.primaryColor}10`,
+                      }}
+                    >
+                      <motion.p
+                        key={item.value}
+                        initial={{ scale: 1.1 }}
+                        animate={{ scale: 1 }}
+                        className="text-2xl sm:text-4xl font-bold"
+                        style={{ color: s.primaryColor }}
+                      >
+                        {String(item.value).padStart(2, "0")}
+                      </motion.p>
+                      <p
+                        className="text-[10px] sm:text-xs mt-1 uppercase tracking-wider"
+                        style={{ color: s.textMuted }}
+                      >
+                        {item.label}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </Section>
 
-              {rsvpSent ? (
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className={`${theme.card} border rounded-2xl p-8 text-center`}
+            {/* ─── Section 4: Acara ─── */}
+            <Section id="acara">
+              <div className="max-w-2xl mx-auto w-full text-center">
+                <h2
+                  className="text-2xl sm:text-3xl font-bold mb-2"
+                  style={{ color: s.primaryColor }}
                 >
-                  <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-green-100">
-                    <Heart className="w-8 h-8 text-green-600 fill-green-600" />
-                  </div>
-                  <h3 className={`text-xl font-bold ${theme.text} mb-2`}>Terima Kasih!</h3>
-                  <p className={theme.textLight}>Konfirmasi Anda telah kami terima</p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleRsvp} className={`${theme.card} border rounded-2xl p-6 sm:p-8 space-y-4`}>
-                  <div>
-                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>Nama</label>
-                    <input
-                      type="text"
-                      value={rsvpForm.name}
-                      onChange={(e) => setRsvpForm((f) => ({ ...f, name: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
-                      placeholder="Nama lengkap Anda"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>Kehadiran</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setRsvpForm((f) => ({ ...f, attendance: "HADIR" }))}
-                        className={`p-3 border-2 rounded-xl text-center transition ${
-                          rsvpForm.attendance === "HADIR" ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200"
-                        }`}
-                      >
-                        ✓ Hadir
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRsvpForm((f) => ({ ...f, attendance: "TIDAK_HADIR" }))}
-                        className={`p-3 border-2 rounded-xl text-center transition ${
-                          rsvpForm.attendance === "TIDAK_HADIR" ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200"
-                        }`}
-                      >
-                        ✗ Tidak Hadir
-                      </button>
-                    </div>
-                  </div>
-                  {rsvpForm.attendance === "HADIR" && (
-                    <div>
-                      <label className={`block text-sm font-medium ${theme.text} mb-1`}>Jumlah Tamu</label>
-                      <select
-                        value={rsvpForm.guests}
-                        onChange={(e) => setRsvpForm((f) => ({ ...f, guests: parseInt(e.target.value) }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
-                      >
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <option key={n} value={n}>{n} orang</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  <div>
-                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>Ucapan & Doa</label>
-                    <textarea
-                      value={rsvpForm.message}
-                      onChange={(e) => setRsvpForm((f) => ({ ...f, message: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
-                      rows={3}
-                      placeholder="Tulis ucapan untuk mempelai..."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={rsvpLoading}
-                    className={`w-full ${theme.button} text-white py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2`}
-                  >
-                    <Send className="w-5 h-5" />
-                    {rsvpLoading ? "Mengirim..." : "Konfirmasi Kehadiran"}
-                  </button>
-                </form>
-              )}
-            </motion.div>
-          </section>
+                  Jadwal Acara
+                </h2>
+                <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
 
-          {/* Section 8: Ucapan */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto w-full px-4"
-            >
-              <h2 className={`text-center font-serif text-3xl ${theme.text} mb-4`}>Ucapan & Doa</h2>
-              <p className={`text-center ${theme.textLight} mb-8`}>
-                <Users className="w-4 h-4 inline mr-1" />
-                {data.rsvps.length} ucapan
-              </p>
-              <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                {data.rsvps.filter((r) => r.message).map((r, i) => (
+                <div className="grid sm:grid-cols-2 gap-5 mt-8">
+                  {/* Akad Nikah */}
                   <motion.div
-                    key={r.id}
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="rounded-2xl p-6 text-center"
+                    style={{
+                      background: s.cardBg,
+                      border: `1.5px solid ${s.borderColor}`,
+                      boxShadow: `0 8px 30px ${s.primaryColor}08`,
+                    }}
+                  >
+                    <div
+                      className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl"
+                      style={{
+                        backgroundColor: `${s.primaryColor}15`,
+                        color: s.primaryColor,
+                      }}
+                    >
+                      🕌
+                    </div>
+                    <h3
+                      className="text-xl font-bold mb-3"
+                      style={{ color: s.primaryColor }}
+                    >
+                      Akad Nikah
+                    </h3>
+                    <div className="space-y-2">
+                      <p
+                        className="flex items-center justify-center gap-2 text-sm"
+                        style={{ color: s.textColor }}
+                      >
+                        <Calendar className="w-4 h-4" style={{ color: s.primaryColor }} />
+                        {formatDate(data.akadDate)}
+                      </p>
+                      <p
+                        className="flex items-center justify-center gap-2 text-sm font-medium"
+                        style={{ color: s.textColor }}
+                      >
+                        <Clock className="w-4 h-4" style={{ color: s.primaryColor }} />
+                        {data.akadTime} WIB
+                      </p>
+                      <div
+                        className="pt-3 mt-3"
+                        style={{ borderTop: `1px solid ${s.borderColor}` }}
+                      >
+                        <p
+                          className="font-semibold text-sm"
+                          style={{ color: s.textColor }}
+                        >
+                          {data.akadVenue}
+                        </p>
+                        <p
+                          className="text-xs mt-1"
+                          style={{ color: s.textMuted }}
+                        >
+                          {data.akadAddress}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Resepsi */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="rounded-2xl p-6 text-center"
+                    style={{
+                      background: s.cardBg,
+                      border: `1.5px solid ${s.borderColor}`,
+                      boxShadow: `0 8px 30px ${s.primaryColor}08`,
+                    }}
+                  >
+                    <div
+                      className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl"
+                      style={{
+                        backgroundColor: `${s.primaryColor}15`,
+                        color: s.primaryColor,
+                      }}
+                    >
+                      🏛️
+                    </div>
+                    <h3
+                      className="text-xl font-bold mb-3"
+                      style={{ color: s.primaryColor }}
+                    >
+                      Resepsi
+                    </h3>
+                    <div className="space-y-2">
+                      <p
+                        className="flex items-center justify-center gap-2 text-sm"
+                        style={{ color: s.textColor }}
+                      >
+                        <Calendar className="w-4 h-4" style={{ color: s.primaryColor }} />
+                        {formatDate(data.resepsiDate)}
+                      </p>
+                      <p
+                        className="flex items-center justify-center gap-2 text-sm font-medium"
+                        style={{ color: s.textColor }}
+                      >
+                        <Clock className="w-4 h-4" style={{ color: s.primaryColor }} />
+                        {data.resepsiTime} WIB
+                      </p>
+                      <div
+                        className="pt-3 mt-3"
+                        style={{ borderTop: `1px solid ${s.borderColor}` }}
+                      >
+                        <p
+                          className="font-semibold text-sm"
+                          style={{ color: s.textColor }}
+                        >
+                          {data.resepsiVenue}
+                        </p>
+                        <p
+                          className="text-xs mt-1"
+                          style={{ color: s.textMuted }}
+                        >
+                          {data.resepsiAddress}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Maps Button */}
+                {data.mapsLink && (
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
-                    className={`${theme.card} border rounded-xl p-4`}
+                    className="mt-8"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <p className={`font-medium ${theme.text}`}>{r.name}</p>
-                      <span className={`text-xs ${theme.textLight}`}>
-                        {new Date(r.createdAt).toLocaleDateString("id-ID")}
-                      </span>
-                    </div>
-                    <p className={`text-sm ${theme.textLight}`}>{r.message}</p>
+                    <a
+                      href={data.mapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all hover:scale-105 hover:shadow-lg"
+                      style={{
+                        backgroundColor: s.buttonBg,
+                        color: s.buttonText,
+                      }}
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Lihat Lokasi
+                    </a>
                   </motion.div>
-                ))}
-                {data.rsvps.filter((r) => r.message).length === 0 && (
-                  <p className={`text-center ${theme.textLight}`}>Belum ada ucapan</p>
                 )}
               </div>
-            </motion.div>
-          </section>
+            </Section>
 
-          {/* Section 9: Penutup */}
-          <section className="invitation-section">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto text-center px-4"
-            >
-              <div className={`ornament-border ${theme.card} border`}>
-                <p className={`${theme.textLight} text-lg mb-6`}>{data.message}</p>
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="w-12 h-px" style={{ backgroundColor: theme.primary }} />
-                  <Heart className="w-5 h-5 fill-current" style={{ color: theme.primary }} />
-                  <div className="w-12 h-px" style={{ backgroundColor: theme.primary }} />
+            {/* ─── Section 5: Gallery ─── */}
+            <Section id="gallery">
+              <div className="max-w-3xl mx-auto w-full text-center">
+                <h2
+                  className="text-2xl sm:text-3xl font-bold mb-2"
+                  style={{ color: s.primaryColor }}
+                >
+                  Galeri Foto
+                </h2>
+                <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8">
+                  {data.gallery.filter(Boolean).map((url, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08, duration: 0.5 }}
+                      className="aspect-square rounded-xl overflow-hidden cursor-pointer group relative"
+                      style={{
+                        boxShadow: `0 4px 20px ${s.primaryColor}15`,
+                      }}
+                      onClick={() => setLightbox(i)}
+                    >
+                      <img
+                        src={url}
+                        alt={data.galleryCaptions[i] || `Foto ${i + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                        style={{ backgroundColor: `${s.primaryColor}30` }}
+                      >
+                        <span className="text-white text-2xl">+</span>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-                <p className={`font-serif text-2xl font-bold ${theme.text}`}>
-                  {data.groomName} & {data.brideName}
-                </p>
-                <p className={`${theme.textLight} mt-4 text-sm`}>
-                  Kami yang berbahagia mengucapkan terima kasih
-                </p>
               </div>
-            </motion.div>
-          </section>
+            </Section>
 
-          {/* Footer */}
-          <footer className="py-8 text-center border-t" style={{ borderColor: `${theme.primary}20` }}>
-            <p className={`text-sm ${theme.textLight}`}>
-              Dibuat dengan ❤️ di{" "}
-              <a href="/" className="font-medium hover:underline" style={{ color: theme.primary }}>
+            {/* Lightbox Modal */}
+            <AnimatePresence>
+              {lightbox !== null && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+                  onClick={() => setLightbox(null)}
+                >
+                  <button
+                    className="absolute top-4 right-4 text-white/80 hover:text-white z-10"
+                    onClick={() => setLightbox(null)}
+                  >
+                    <X className="w-8 h-8" />
+                  </button>
+                  <motion.img
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    src={data.gallery[lightbox]}
+                    alt=""
+                    className="max-w-full max-h-[85vh] rounded-xl object-contain"
+                  />
+                  {data.galleryCaptions[lightbox] && (
+                    <p className="absolute bottom-6 text-white/80 text-sm text-center">
+                      {data.galleryCaptions[lightbox]}
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ─── Section 6: RSVP ─── */}
+            <Section id="rsvp">
+              <div className="max-w-md mx-auto w-full text-center">
+                <h2
+                  className="text-2xl sm:text-3xl font-bold mb-2"
+                  style={{ color: s.primaryColor }}
+                >
+                  Konfirmasi Kehadiran
+                </h2>
+                <p className="text-sm mb-8" style={{ color: s.textMuted }}>
+                  Mohon konfirmasi kehadiran Anda
+                </p>
+
+                {rsvpSent ? (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="rounded-2xl p-8 text-center"
+                    style={{
+                      background: s.cardBg,
+                      border: `1.5px solid ${s.borderColor}`,
+                    }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: 2, duration: 0.5 }}
+                    >
+                      <Heart
+                        className="w-14 h-14 mx-auto mb-4"
+                        style={{ color: s.primaryColor, fill: s.primaryColor }}
+                      />
+                    </motion.div>
+                    <h3
+                      className="text-xl font-bold mb-2"
+                      style={{ color: s.primaryColor }}
+                    >
+                      Terima Kasih!
+                    </h3>
+                    <p className="text-sm" style={{ color: s.textMuted }}>
+                      Konfirmasi kehadiran Anda telah kami terima. Sampai jumpa
+                      di hari bahagia kami!
+                    </p>
+                  </motion.div>
+                ) : (
+                  <form
+                    onSubmit={handleRsvp}
+                    className="rounded-2xl p-6 sm:p-8 space-y-5 text-left"
+                    style={{
+                      background: s.cardBg,
+                      border: `1.5px solid ${s.borderColor}`,
+                      boxShadow: `0 8px 30px ${s.primaryColor}08`,
+                    }}
+                  >
+                    {/* Name */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: s.textColor }}
+                      >
+                        Nama
+                      </label>
+                      <input
+                        type="text"
+                        value={rsvpForm.name}
+                        onChange={(e) =>
+                          setRsvpForm((f) => ({ ...f, name: e.target.value }))
+                        }
+                        className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2"
+                        style={{
+                          border: `1.5px solid ${s.borderColor}`,
+                          backgroundColor: `${s.bgColor}`,
+                          color: s.textColor,
+                        }}
+                        placeholder="Nama lengkap Anda"
+                        required
+                      />
+                    </div>
+
+                    {/* Attendance */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: s.textColor }}
+                      >
+                        Kehadiran
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRsvpForm((f) => ({
+                              ...f,
+                              attendance: "HADIR",
+                            }))
+                          }
+                          className="p-3 rounded-xl text-center text-sm font-medium transition-all"
+                          style={{
+                            border: `2px solid ${rsvpForm.attendance === "HADIR" ? s.primaryColor : s.borderColor}`,
+                            backgroundColor:
+                              rsvpForm.attendance === "HADIR"
+                                ? `${s.primaryColor}15`
+                                : "transparent",
+                            color:
+                              rsvpForm.attendance === "HADIR"
+                                ? s.primaryColor
+                                : s.textMuted,
+                          }}
+                        >
+                          ✓ Hadir
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRsvpForm((f) => ({
+                              ...f,
+                              attendance: "TIDAK_HADIR",
+                            }))
+                          }
+                          className="p-3 rounded-xl text-center text-sm font-medium transition-all"
+                          style={{
+                            border: `2px solid ${rsvpForm.attendance === "TIDAK_HADIR" ? "#EF4444" : s.borderColor}`,
+                            backgroundColor:
+                              rsvpForm.attendance === "TIDAK_HADIR"
+                                ? "#FEF2F2"
+                                : "transparent",
+                            color:
+                              rsvpForm.attendance === "TIDAK_HADIR"
+                                ? "#DC2626"
+                                : s.textMuted,
+                          }}
+                        >
+                          ✗ Tidak Hadir
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Guests */}
+                    {rsvpForm.attendance === "HADIR" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <label
+                          className="block text-sm font-medium mb-1.5"
+                          style={{ color: s.textColor }}
+                        >
+                          Jumlah Hadir
+                        </label>
+                        <select
+                          value={rsvpForm.guests}
+                          onChange={(e) =>
+                            setRsvpForm((f) => ({
+                              ...f,
+                              guests: parseInt(e.target.value),
+                            }))
+                          }
+                          className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                          style={{
+                            border: `1.5px solid ${s.borderColor}`,
+                            backgroundColor: s.bgColor,
+                            color: s.textColor,
+                          }}
+                        >
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <option key={n} value={n}>
+                              {n} orang
+                            </option>
+                          ))}
+                        </select>
+                      </motion.div>
+                    )}
+
+                    {/* Message */}
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ color: s.textColor }}
+                      >
+                        Ucapan & Doa
+                      </label>
+                      <textarea
+                        value={rsvpForm.message}
+                        onChange={(e) =>
+                          setRsvpForm((f) => ({
+                            ...f,
+                            message: e.target.value,
+                          }))
+                        }
+                        className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
+                        style={{
+                          border: `1.5px solid ${s.borderColor}`,
+                          backgroundColor: s.bgColor,
+                          color: s.textColor,
+                        }}
+                        rows={3}
+                        placeholder="Tulis ucapan untuk mempelai..."
+                      />
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={rsvpLoading}
+                      className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-60"
+                      style={{
+                        backgroundColor: s.buttonBg,
+                        color: s.buttonText,
+                      }}
+                    >
+                      <Send className="w-4 h-4" />
+                      {rsvpLoading
+                        ? "Mengirim..."
+                        : "Kirim Konfirmasi"}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </Section>
+
+            {/* ─── Section 7: Ucapan ─── */}
+            <Section id="ucapan">
+              <div className="max-w-lg mx-auto w-full text-center">
+                <h2
+                  className="text-2xl sm:text-3xl font-bold mb-2"
+                  style={{ color: s.primaryColor }}
+                >
+                  Ucapan & Doa
+                </h2>
+                <p className="text-sm mb-6 flex items-center justify-center gap-1" style={{ color: s.textMuted }}>
+                  <Users className="w-4 h-4" />
+                  {data.rsvps.length} ucapan
+                </p>
+
+                <div
+                  className="max-h-[400px] overflow-y-auto space-y-3 pr-1 text-left rounded-2xl p-4"
+                  style={{
+                    background: s.cardBg,
+                    border: `1.5px solid ${s.borderColor}`,
+                  }}
+                >
+                  {data.rsvps
+                    .filter((r) => r.message)
+                    .map((r, i) => (
+                      <motion.div
+                        key={r.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.05 }}
+                        className="rounded-xl p-4"
+                        style={{
+                          backgroundColor: `${s.primaryColor}08`,
+                          borderLeft: `3px solid ${s.primaryColor}`,
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p
+                            className="font-semibold text-sm"
+                            style={{ color: s.primaryColor }}
+                          >
+                            {r.name}
+                          </p>
+                          <span
+                            className="text-[10px]"
+                            style={{ color: s.textMuted }}
+                          >
+                            {new Date(r.createdAt).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm" style={{ color: s.textColor }}>
+                          {r.message}
+                        </p>
+                      </motion.div>
+                    ))}
+                  {data.rsvps.filter((r) => r.message).length === 0 && (
+                    <div className="py-8 text-center">
+                      <Music className="w-8 h-8 mx-auto mb-2 opacity-30" style={{ color: s.primaryColor }} />
+                      <p className="text-sm" style={{ color: s.textMuted }}>
+                        Belum ada ucapan. Jadilah yang pertama!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Section>
+
+            {/* ─── Section 8: Penutup ─── */}
+            <Section id="penutup">
+              <div className="max-w-lg mx-auto text-center">
+                <OrnamentalFrame style={s}>
+                  <p className="text-sm sm:text-base leading-relaxed mb-6" style={{ color: s.textMuted }}>
+                    Merupakan suatu kehormatan dan kebahagiaan bagi kami
+                    apabila Bapak/Ibu/Saudara/i berkenan hadir untuk
+                    memberikan doa restu kepada kedua mempelai.
+                  </p>
+
+                  <OrnamentalDivider color={s.borderColor} char="❦" />
+
+                  <p className="text-sm mb-4" style={{ color: s.textMuted }}>
+                    Kami yang berbahagia,
+                  </p>
+                  <h3
+                    className="text-2xl sm:text-3xl font-bold mb-1"
+                    style={{ color: s.primaryColor }}
+                  >
+                    {data.groomName} & {data.brideName}
+                  </h3>
+
+                  <OrnamentalDivider color={s.borderColor} char={s.ornamentChar} />
+
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: s.primaryColor }}
+                  >
+                    Wassalamualaikum Wr. Wb.
+                  </p>
+                </OrnamentalFrame>
+              </div>
+            </Section>
+
+            {/* ─── Footer ─── */}
+            <footer
+              className="py-8 pb-20 text-center"
+              style={{ borderTop: `1px solid ${s.borderColor}` }}
+            >
+              <p className="text-xs" style={{ color: s.textMuted }}>
+                Dibuat dengan ❤️ menggunakan
+              </p>
+              <a
+                href="/"
+                className="inline-block mt-1 text-sm font-bold transition-all hover:scale-105"
+                style={{ color: s.primaryColor }}
+              >
                 WirNikah
               </a>
-            </p>
-          </footer>
-        </div>
+            </footer>
+          </div>
+        </>
       )}
     </div>
   );
