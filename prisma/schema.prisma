@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Template {
+  ELEGANT_GOLD
+  GARDEN_ROMANCE
+  MODERN_MINIMALIST
+}
+
+enum Attendance {
+  HADIR
+  TIDAK_HADIR
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String?
+  email       String       @unique
+  password    String?
+  image       String?
+  invitations Invitation[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Invitation {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug           String   @unique
+  template       Template @default(ELEGANT_GOLD)
+  groomName      String
+  groomFullName  String
+  groomParents   String
+  groomPhoto     String?
+  groomInstagram String?
+  brideName      String
+  brideFullName  String
+  brideParents   String
+  bridePhoto     String?
+  brideInstagram String?
+  akadDate       String
+  akadTime       String
+  akadVenue      String
+  akadAddress    String
+  resepsiDate    String
+  resepsiTime    String
+  resepsiVenue   String
+  resepsiAddress String
+  mapsLink       String?
+  gallery        String[]
+  galleryCaptions String[]
+  quote          String?
+  message        String?
+  musicChoice    String   @default("romantic1")
+  published      Boolean  @default(false)
+  rsvps          RSVP[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model RSVP {
+  id           String     @id @default(cuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  name         String
+  attendance   Attendance
+  guests       Int        @default(1)
+  message      String?
+  createdAt    DateTime   @default(now())
+}

@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --gold: #B8860B;
+    --cream: #FFF8DC;
+    --brown: #8B7355;
+    --blush: #F8B4C8;
+    --forest: #2D5016;
+  }
+}
+
+@layer utilities {
+  .text-gold { color: var(--gold); }
+  .bg-cream { background-color: var(--cream); }
+  .text-brown { color: var(--brown); }
+  .bg-blush { background-color: var(--blush); }
+  .text-forest { color: var(--forest); }
+}
+
+/* Elegant scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #B8860B;
+  border-radius: 3px;
+}
+
+/* Invitation page styles */
+.invitation-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+.ornament-border {
+  border: 2px solid var(--gold);
+  border-radius: 1rem;
+  padding: 2rem;
+  position: relative;
+}
+
+.ornament-border::before,
+.ornament-border::after {
+  content: "✦";
+  position: absolute;
+  color: var(--gold);
+  font-size: 1.5rem;
+}
+
+.ornament-border::before {
+  top: -0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ornament-border::after {
+  bottom: -0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Envelope animation */
+@keyframes envelopeOpen {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-180deg); }
+}
+
+.envelope-flap {
+  transform-origin: top;
+  animation: envelopeOpen 1s ease-out forwards;
+}
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
